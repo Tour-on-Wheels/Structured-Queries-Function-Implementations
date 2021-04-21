@@ -16,7 +16,7 @@ binarysearch.o : binarysearch.cpp
 binaryTest :
 	make clean
 	make binarysearch
-	./binarysearch TestCases/TC_search/sorted_input TestCases/TC_search/query_search.txt outputbinary
+	./binarysearch TestCases/TC_search/sorted_input TestCases/TC_search/query_search.txt TestCases/TC_search/outputbinary
 
 buffer_manager.o : buffer_manager.cpp
 	g++ -std=c++11 -c buffer_manager.cpp
