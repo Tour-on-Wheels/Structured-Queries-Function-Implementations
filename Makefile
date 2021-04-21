@@ -1,10 +1,10 @@
-sampleobjects = buffer_manager.o file_manager.o sample_run.o
+linearsearchobjects = buffer_manager.o file_manager.o linearsearch.o
 
-sample_run : $(sampleobjects)
-	     g++ -std=c++11 -o sample_run $(sampleobjects)
+linearsearch : $(linearsearchobjects)
+	g++ -std=c++11 -o linearsearch $(linearsearchobjects)
 
-sample_run.o : sample_run.cpp
-	g++ -std=c++11 -c sample_run.cpp
+linearsearch.o : linearsearch.cpp
+	g++ -std=c++11 -c linearsearch.cpp
 
 buffer_manager.o : buffer_manager.cpp
 	g++ -std=c++11 -c buffer_manager.cpp
@@ -14,4 +14,4 @@ file_manager.o : file_manager.cpp
 
 clean :
 	rm -f *.o
-	rm -f sample_run
+	rm -f linearsearch
