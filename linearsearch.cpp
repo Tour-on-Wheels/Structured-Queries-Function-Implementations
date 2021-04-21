@@ -1,9 +1,9 @@
 #include "file_manager.h"
+#include "errors.h"
 #include <iostream>
+#include <limits.h>
 #include <fstream>
 #include <string>
-
-using namespace std;
 
 ifstream infile;
 FileManager fm;
@@ -23,8 +23,8 @@ void output_write(int value) {
     if(k == PAGE_CONTENT_SIZE/sizeof(int)) {
         fh2.UnpinPage(ph2.GetPageNum());
         fh2.FlushPage(ph2.GetPageNum());
-        k = 0;
         ph2 = fh2.NewPage();
+        k = 0;
     }
     ((int *)ph2.GetData())[k++] = value;
 }
@@ -37,7 +37,7 @@ int main(int argc, const char* argv[]){
     int num;
     while(infile >> str) {
         infile >> num;
-        int i=0;
+        int i = 0;
         while(true) {
             try {
                 ph1 = fh1.PageAt(i);
@@ -46,9 +46,8 @@ int main(int argc, const char* argv[]){
                 output_write(-1);
                 break;
             }
-            int *data = (int *)ph1.GetData();
             for(int j=0; j<PAGE_CONTENT_SIZE/sizeof(int); j++) {
-                if(data[j] == num) {
+                if(((int *)ph1.GetData())[j] == num) {
                     output_write(i);
                     output_write(j);
                 }
