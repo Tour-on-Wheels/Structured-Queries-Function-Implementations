@@ -80,3 +80,13 @@ void BinarySearch(int a, int start, int end, bool &isFound, int &iterstart, int 
     }
 }
 
+int main(int argc, const char* argv[]) {
+    if(argc < 3)
+    {
+        cout<<"Few arguments"<<endl;
+        return 0;
+    }
+    FileManager fm;
+    FileHandler in = fm.OpenFile(argv[1]);
+    
+}
