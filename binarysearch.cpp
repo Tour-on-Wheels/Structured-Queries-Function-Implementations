@@ -23,8 +23,7 @@ void BinarySearch(int a, int start, int end, bool &isFound, int &iterstart, int 
         int curr;
         memcpy(&curr, &data[offset*sizeof(int)], sizeof(int));
         int prev = INT_MIN;
-        if(mid > 0 && curr == a)
-        {
+        if(mid > 0 && curr == a) {
             if(offset != 0)
                 memcpy(&prev, &data[(offset-1)*sizeof(int)], sizeof(int));
             else {
@@ -36,8 +35,7 @@ void BinarySearch(int a, int start, int end, bool &isFound, int &iterstart, int 
         }
         
         int next = INT_MAX;
-        if(mid < totalnumbers-1 && curr == a)
-        {
+        if(mid < totalnumbers-1 && curr == a) {
             if(offset != intPerPage-1)
                 memcpy(&next, &data[(offset+1)*sizeof(int)], sizeof(int));
             else {
@@ -46,23 +44,20 @@ void BinarySearch(int a, int start, int end, bool &isFound, int &iterstart, int 
                 memcpy(&next, &data1[0], sizeof(int));
             }
         }
-        if(curr == a && prev < curr && next > curr)
-        {
+        if(curr == a && prev < curr && next > curr) {
             isFound = true;
             iterstart = mid;
             iterend = mid;
             return;
         }
-        if(curr == a && prev < curr)
-        {
+        if(curr == a && prev < curr) {
             isFound = true;
             iterstart = mid;
             if(iterend == -1)
                 BinarySearch(a, mid+1, end, isFound, iterstart, iterend, in);
             return;
         }
-        if(curr == a && next > curr)
-        {
+        if(curr == a && next > curr) {
             isFound = true;
             iterend = mid;
             if(iterstart == -1)
@@ -70,13 +65,9 @@ void BinarySearch(int a, int start, int end, bool &isFound, int &iterstart, int 
             return;
         }
         if(curr >= a && (iterstart == -1 || iterend == -1))
-        {
             BinarySearch(a, start, mid-1, isFound, iterstart, iterend, in);
-        }
         if(curr <= a && (iterstart == -1 || iterend == -1))
-        {
             BinarySearch(a, mid+1, end, isFound, iterstart, iterend, in);
-        }
     }
 }
 
@@ -89,24 +80,18 @@ int main(int argc, const char* argv[]){
     FileManager fm;
     FileHandler in = fm.OpenFile(argv[1]);
     FileHandler out = fm.CreateFile(argv[3]);
-    // out.NewPage();
     PageHandler lp = in.LastPage();
     in.FlushPages();
     int totalPage = lp.GetPageNum()+1;
     intPerPage = PAGE_CONTENT_SIZE/sizeof(int);
     char* data = lp.GetData();
-    // printfile(in, "INPUT");
     int intLastPage = 0;
     int curr=0;
     int i=-4;
-    while(intLastPage < intPerPage)
-    {
-        
+    while(intLastPage < intPerPage) {        
         memcpy(&curr, &data[i+sizeof(int)], sizeof(int));
         if(curr == INT_MIN)
-        {
             break;
-        }
         intLastPage++;
         i = i+4;
     }
@@ -126,11 +111,8 @@ int main(int argc, const char* argv[]){
         int iterstart = -1;
         int iterend = -1;
         BinarySearch(a, start, end, isFound, iterstart, iterend, in);
-        // printfile(out, "OUTPUT");
-        if(isFound)
-        {
-            for(int i=iterstart; i<=iterend; i++)
-            {
+        if(isFound) {
+            for(int i=iterstart; i<=iterend; i++) {
                 int pageIndex = i/intPerPage;
                 int offset = i%intPerPage;
 
@@ -145,10 +127,9 @@ int main(int argc, const char* argv[]){
                 data = pg.GetData();
                 memcpy(&data[offsetOut*sizeof(int)], &pageIndex, sizeof(int));
                 sizeofout++;
-                if(offsetOut == intPerPage-1)
-                {
+                if(offsetOut == intPerPage-1) {
                     out.MarkDirty(pg.GetPageNum());
-                    out.FlushPages();//pg.GetPageNum());
+                    out.FlushPages();
                     pg = out.NewPage();
                     offsetOut = -1;
                 }
@@ -171,8 +152,7 @@ int main(int argc, const char* argv[]){
         int t = -1;
         memcpy(&data[offset*sizeof(int)], &t, sizeof(int));
         sizeofout++;
-        if(offset == intPerPage-1)
-        {
+        if(offset == intPerPage-1) {
             out.MarkDirty(pg.GetPageNum());
             out.FlushPages();
             pg = out.NewPage();
@@ -185,13 +165,11 @@ int main(int argc, const char* argv[]){
         out.FlushPages();
     }
 
-    if(sizeofout%intPerPage != 0)
-    {
+    if(sizeofout%intPerPage != 0) {
         PageHandler pg = out.LastPage();
         data = pg.GetData();
         int offset = sizeofout%intPerPage;
-        for(int i=offset; i<intPerPage; i++)
-        {
+        for(int i=offset; i<intPerPage; i++) {
             int t = INT_MIN;
             memcpy(&data[i*4], &t, sizeof(int));
         }
