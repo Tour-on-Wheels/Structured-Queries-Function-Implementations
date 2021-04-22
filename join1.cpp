@@ -2,7 +2,6 @@
 #include "errors.h"
 #include <iostream>
 #include <limits.h>
-#include <fstream>
 #include <string>
 
 FileManager fm;
@@ -32,36 +31,39 @@ int main(int argc, const char* argv[]) {
     fh1 = fm.OpenFile(argv[1]);
     fh2 = fm.OpenFile(argv[2]);
     fh3 = fm.CreateFile(argv[3]);
-    int i = 0;
-    while(true) {
-        try {
-            ph1 = fh1.PageAt(i);
-        } catch(...) {
-            break;
-        }
-        int j = 0;
+    try {
+        int i = 0;
         while(true) {
-            try {
-                ph2 = fh2.PageAt(j);
-            } catch(...) {
-                break;
-            }
+            ph1 = fh1.PageAt(i);
             for(int a=0; a<PAGE_CONTENT_SIZE/sizeof(int); a++) {
-                for(int b=0; b<PAGE_CONTENT_SIZE/sizeof(int); b++) {
-                    if(((int *)ph1.GetData())[a] == ((int *)ph2.GetData())[b]) {
-                        output_write(((int *)ph1.GetData())[a]);
+                if(((int *)ph1.GetData())[a] == INT_MIN) {
+                    throw InvalidPageException();
+                } try {
+                    int j = 0;
+                    while(true) {
+                        ph2 = fh2.PageAt(j);
+                        for(int b=0; b<PAGE_CONTENT_SIZE/sizeof(int); b++) {
+                            if(((int *)ph2.GetData())[b] == INT_MIN) {
+                                throw InvalidPageException();
+                            } else if(((int *)ph2.GetData())[b] == ((int *)ph1.GetData())[a]) {
+                                output_write(((int *)ph1.GetData())[a]);
+                            }
+                        }
+                        fh2.UnpinPage(j);
+                        fh2.FlushPage(j);
+                        j++;
                     }
+                } catch(...) {
+                    continue;
                 }
             }
-            fh2.UnpinPage(j);
-            fh2.FlushPage(j);
-            j++;
+            fh1.UnpinPage(i);
+            fh1.FlushPage(i);
+            i++;
         }
-        fh1.UnpinPage(i);
-        fh1.FlushPage(i);
-        i++;
+    } catch(...) {
+        output_close();
     }
-    output_close();
     fm.CloseFile(fh1);
     fm.CloseFile(fh2);
     fm.CloseFile(fh3);

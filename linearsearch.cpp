@@ -37,24 +37,25 @@ int main(int argc, const char* argv[]) {
     int num;
     while(infile >> str) {
         infile >> num;
-        int i = 0;
-        while(true) {
-            try {
+        try {
+            int i = 0;
+            while(true) {
                 ph1 = fh1.PageAt(i);
-            } catch(...) {
-                output_write(-1);
-                output_write(-1);
-                break;
-            }
-            for(int j=0; j<PAGE_CONTENT_SIZE/sizeof(int); j++) {
-                if(((int *)ph1.GetData())[j] == num) {
-                    output_write(i);
-                    output_write(j);
+                for(int j=0; j<PAGE_CONTENT_SIZE/sizeof(int); j++) {
+                    if(((int *)ph1.GetData())[j] == INT_MIN) {
+                        throw InvalidPageException();
+                    } else if(((int *)ph1.GetData())[j] == num) {
+                        output_write(i);
+                        output_write(j);
+                    }
                 }
+                fh1.UnpinPage(i);
+                fh1.FlushPage(i);
+                i++;
             }
-            fh1.UnpinPage(i);
-            fh1.FlushPage(i);
-            i++;
+        } catch(...) {
+            output_write(-1);
+            output_write(-1);
         }
     }
     output_close();
