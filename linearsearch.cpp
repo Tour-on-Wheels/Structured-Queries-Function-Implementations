@@ -29,7 +29,7 @@ void output_write(int value) {
     ((int *)ph2.GetData())[k++] = value;
 }
 
-int main(int argc, const char* argv[]){
+int main(int argc, const char* argv[]) {
     fh1 = fm.OpenFile(argv[1]);
     infile.open(argv[2]);
     fh2 = fm.CreateFile(argv[3]);
