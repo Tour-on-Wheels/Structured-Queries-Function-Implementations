@@ -7,8 +7,8 @@
 
 ifstream infile;
 FileManager fm;
-FileHandler fh1, fh2;
-PageHandler ph1, ph2;
+FileHandler fh1, fh2, fh3;
+PageHandler ph1, ph2, ph3;
 int k = PAGE_CONTENT_SIZE/sizeof(int);
 
 void output_close() {
@@ -31,35 +31,40 @@ void output_write(int value) {
 
 int main(int argc, const char* argv[]) {
     fh1 = fm.OpenFile(argv[1]);
-    infile.open(argv[2]);
-    fh2 = fm.CreateFile(argv[3]);
-    string str;
-    int num;
-    while(infile >> str) {
-        infile >> num;
-        int i = 0;
+    fh2 = fm.OpenFile(argv[2]);
+    fh3 = fm.CreateFile(argv[3]);
+    int i = 0;
+    while(true) {
+        try {
+            ph1 = fh1.PageAt(i);
+        } catch(...) {
+            break;
+        }
+        int j = 0;
         while(true) {
             try {
-                ph1 = fh1.PageAt(i);
+                ph2 = fh2.PageAt(j);
             } catch(...) {
-                output_write(-1);
-                output_write(-1);
                 break;
             }
-            for(int j=0; j<PAGE_CONTENT_SIZE/sizeof(int); j++) {
-                if(((int *)ph1.GetData())[j] == num) {
-                    output_write(i);
-                    output_write(j);
+            for(int a=0; a<PAGE_CONTENT_SIZE/sizeof(int); a++) {
+                for(int b=0; b<PAGE_CONTENT_SIZE/sizeof(int); b++) {
+                    if(((int *)ph1.GetData())[a] == ((int *)ph2.GetData())[b]) {
+                        output_write(((int *)ph1.GetData())[a]);
+                    }
                 }
             }
-            fh1.UnpinPage(i);
-            fh1.FlushPage(i);
-            i++;
+            fh2.UnpinPage(j);
+            fh2.FlushPage(j);
+            j++;
         }
+        fh1.UnpinPage(i);
+        fh1.FlushPage(i);
+        i++;
     }
     output_close();
     fm.CloseFile(fh1);
-    infile.close();
     fm.CloseFile(fh2);
+    fm.CloseFile(fh3);
     return 0;
 }
