@@ -21,10 +21,10 @@ binaryTest :
 	./binarysearch TestCases/TC_search/sorted_input TestCases/TC_search/query_search.txt TestCases/TC_search/outputbinary
 
 deletion : $(deletionobjects)
-	g++ -std=c++11 -o deletion $(deletionobjects)
+	g++ -std=c++11 -g -o deletion $(deletionobjects)
 
 deletion.o : deletion.cpp
-	g++ -std=c++11 -c deletion.cpp
+	g++ -std=c++11 -g -c deletion.cpp
 
 deletionTest :
 	make clean

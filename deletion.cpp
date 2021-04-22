@@ -52,35 +52,58 @@ void BinarySearch(int a, int start, int end, bool &isFound, int &iterstart, int 
     if(start <= end)
     {
         int mid = start + (end-start)/2;
+        if(a==3)
+        {
+            cout<<mid<<endl;
+        }
         int pageIndex = mid/intPerPage;
         int offset = mid%intPerPage;
         PageHandler pg = in.PageAt(pageIndex);
-        in.FlushPages();
         char* data = pg.GetData();
         int curr;
+        memcpy(&curr, &data[1*sizeof(int)], sizeof(int));
+        cout<<"before"<<curr<<endl;
+        in.FlushPages();
+        memcpy(&curr, &data[1*sizeof(int)], sizeof(int));
+        cout<<"after"<<curr<<endl;
         memcpy(&curr, &data[offset*sizeof(int)], sizeof(int));
+        
+        if(mid==6)
+            {
+                cout<<"mid: "<<mid<<"intPerPage: "<<intPerPage<<endl;
+                cout<<"pageIndex : "<<pageIndex<<"offset: "<<offset<<endl;
+                cout<<"curr: "<<curr<<endl;
+            }
         int prev = INT_MIN;
         if(mid > 0 && curr == a) {
             if(offset != 0)
                 memcpy(&prev, &data[(offset-1)*sizeof(int)], sizeof(int));
             else {
-                
-                char* data1 = in.PageAt(pageIndex-1).GetData();
-                in.FlushPages();
+                if(mid==6)
+                {
+                    cout<<"SOMETHING"<<endl;
+                }
+                PageHandler p = in.PageAt(pageIndex-1);
+                char* data1 = p.GetData();
                 memcpy(&prev, &data1[(intPerPage-1)*sizeof(int)], sizeof(int));
             }
         }
-        
         int next = INT_MAX;
         if(mid < totalnumbers-1 && curr == a) {
             if(offset != intPerPage-1)
+            {
                 memcpy(&next, &data[(offset+1)*sizeof(int)], sizeof(int));
+                if(mid==6)
+                {
+                    cout<<"HELL YEAH"<<next<<endl;
+                }
+            }
             else {
                 char* data1 = in.PageAt(pageIndex+1).GetData();
-                in.FlushPages();
                 memcpy(&next, &data1[0], sizeof(int));
             }
         }
+        
         if(curr == a && prev < curr && next > curr) {
             isFound = true;
             iterstart = mid;
@@ -91,14 +114,22 @@ void BinarySearch(int a, int start, int end, bool &isFound, int &iterstart, int 
             isFound = true;
             iterstart = mid;
             if(iterend == -1)
+            {
+                cout<<"yeah!"<<end<<endl;
                 BinarySearch(a, mid+1, end, isFound, iterstart, iterend, in);
+            }
             return;
         }
+        if(mid==6)
+            cout<<"next: "<<next<<endl;
         if(curr == a && next > curr) {
             isFound = true;
             iterend = mid;
             if(iterstart == -1)
+            {
+                cout<<"nah!"<<mid<<endl;
                 BinarySearch(a, start, mid-1, isFound, iterstart, iterend, in);
+            }
             return;
         }
         if(curr >= a && (iterstart == -1 || iterend == -1))
@@ -155,7 +186,6 @@ int main(int argc, const char* argv[]) {
     FileHandler in = fm.OpenFile(argv[1]);
     PageHandler lp = in.LastPage();
     printfile(in, "INPUT FILE");
-    in.FlushPages();
     int totalPage = lp.GetPageNum()+1;
     intPerPage = PAGE_CONTENT_SIZE/sizeof(int);
     char* data = lp.GetData();
@@ -169,7 +199,8 @@ int main(int argc, const char* argv[]) {
         intLastPage++;
         i = i+4;
     }
-    totalnumbers = (totalPage-1)*intPerPage+intLastPage;
+    int totalnumbers1 = (totalPage-1)*intPerPage+intLastPage;
+    totalnumbers = totalnumbers1;
     ifstream query;
     query.open(argv[2]);
     string temp;
@@ -186,7 +217,9 @@ int main(int argc, const char* argv[]) {
         BinarySearch(a, start, end, isFound, iterstart, iterend, in);
         if(isFound) {
             cout<<"Deleting from "<<iterstart<<" to "<<iterend<<" value: "<<a<<endl;
+            int diff = iterend-iterstart+1;
             deleteRange(iterstart, iterend-iterstart+1, in);
+            totalnumbers = totalnumbers-diff;
             printfile(in, "INPUT FILE");
             // break;
         }
