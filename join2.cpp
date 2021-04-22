@@ -39,23 +39,29 @@ int main(int argc, const char* argv[]) {
         } catch(...) {
             break;
         }
-        int j = 0;
-        while(true) {
+        for(int a=0; a<PAGE_CONTENT_SIZE/sizeof(int); a++) {
             try {
-                ph2 = fh2.PageAt(j);
-            } catch(...) {
-                break;
-            }
-            for(int a=0; a<PAGE_CONTENT_SIZE/sizeof(int); a++) {
-                for(int b=0; b<PAGE_CONTENT_SIZE/sizeof(int); b++) {
-                    if(((int *)ph1.GetData())[a] == ((int *)ph2.GetData())[b]) {
-                        output_write(((int *)ph1.GetData())[a]);
+                int j = 0;
+                bool exp = false; 
+                while(true) {
+                    ph2 = fh2.PageAt(j);
+                    for(int b=0; b<PAGE_CONTENT_SIZE/sizeof(int); b++) {
+                        if(((int *)ph1.GetData())[a] == ((int *)ph2.GetData())[b]) {
+                            exp = true;
+                            output_write(((int *)ph1.GetData())[a]);
+                        } else {
+                            if(exp) {
+                                throw InvalidPageException();
+                            }
+                        }
                     }
+                    fh2.UnpinPage(j);
+                    fh2.FlushPage(j);
+                    j++;
                 }
+            } catch(...) {
+                continue;
             }
-            fh2.UnpinPage(j);
-            fh2.FlushPage(j);
-            j++;
         }
         fh1.UnpinPage(i);
         fh1.FlushPage(i);
