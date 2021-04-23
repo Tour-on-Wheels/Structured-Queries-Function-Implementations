@@ -5,7 +5,7 @@
 
 int main(int argc, const char* argv[]) {
 	FileManager fm;
-    FileHandler fh = fm.OpenFile(argv[1]);
+	FileHandler fh = fm.OpenFile(argv[1]);
 	int size = fh.LastPage().GetPageNum()+1;
 	fh.FlushPages();
 	for(int i = 0; i < size; i++) {
