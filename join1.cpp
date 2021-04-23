@@ -2,7 +2,6 @@
 #include "errors.h"
 #include <iostream>
 #include <limits.h>
-#include <string>
 
 FileManager fm;
 FileHandler fh1, fh2, fh3;
@@ -11,59 +10,43 @@ int k = PAGE_CONTENT_SIZE/sizeof(int);
 
 void output_close() {
     while(k < PAGE_CONTENT_SIZE/sizeof(int)) {
-        ((int *)ph2.GetData())[k++] = INT_MIN;
-    }
-    fh2.UnpinPage(ph2.GetPageNum());
-    fh2.FlushPage(ph2.GetPageNum());
+        ((int *)ph3.GetData())[k++] = INT_MIN;
+    } fh3.FlushPage(ph3.GetPageNum());
 }
 
 void output_write(int value) {
     if(k == PAGE_CONTENT_SIZE/sizeof(int)) {
-        fh2.UnpinPage(ph2.GetPageNum());
-        fh2.FlushPage(ph2.GetPageNum());
-        ph2 = fh2.NewPage();
+        fh3.FlushPage(ph3.GetPageNum());
+        ph3 = fh3.NewPage();
         k = 0;
-    }
-    ((int *)ph2.GetData())[k++] = value;
+    } ((int *)ph3.GetData())[k++] = value;
 }
 
 int main(int argc, const char* argv[]) {
     fh1 = fm.OpenFile(argv[1]);
+    int size1 = fh1.LastPage().GetPageNum()+1;
+    fh1.FlushPages();
     fh2 = fm.OpenFile(argv[2]);
+    int size2 = fh2.LastPage().GetPageNum()+1;
+    fh2.FlushPages();
     fh3 = fm.CreateFile(argv[3]);
-    try {
-        int i = 0;
-        while(true) {
-            ph1 = fh1.PageAt(i);
-            for(int a=0; a<PAGE_CONTENT_SIZE/sizeof(int); a++) {
-                if(((int *)ph1.GetData())[a] == INT_MIN) {
-                    throw InvalidPageException();
-                } try {
-                    int j = 0;
-                    while(true) {
-                        ph2 = fh2.PageAt(j);
-                        for(int b=0; b<PAGE_CONTENT_SIZE/sizeof(int); b++) {
-                            if(((int *)ph2.GetData())[b] == INT_MIN) {
-                                throw InvalidPageException();
-                            } else if(((int *)ph2.GetData())[b] == ((int *)ph1.GetData())[a]) {
-                                output_write(((int *)ph1.GetData())[a]);
-                            }
-                        }
-                        fh2.UnpinPage(j);
-                        fh2.FlushPage(j);
-                        j++;
+    for(int i = 0; i < size1; i++) {
+        ph1 = fh1.PageAt(i);
+        for(int a=0; a<PAGE_CONTENT_SIZE/sizeof(int); a++) {
+            if(((int *)ph1.GetData())[a] == INT_MIN) {
+                break;
+            } for(int j = 0; j < size2; j++) {
+                ph2 = fh2.PageAt(j);
+                for(int b=0; b<PAGE_CONTENT_SIZE/sizeof(int); b++) {
+                    if(((int *)ph2.GetData())[b] == INT_MIN) {
+                        break;
+                    } else if(((int *)ph2.GetData())[b] == ((int *)ph1.GetData())[a]) {
+                        output_write(((int *)ph1.GetData())[a]);
                     }
-                } catch(...) {
-                    continue;
-                }
+                } fh2.FlushPage(j);
             }
-            fh1.UnpinPage(i);
-            fh1.FlushPage(i);
-            i++;
-        }
-    } catch(...) {
-        output_close();
-    }
+        } fh1.FlushPage(i);
+    } output_close();
     fm.CloseFile(fh1);
     fm.CloseFile(fh2);
     fm.CloseFile(fh3);
