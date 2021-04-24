@@ -18,6 +18,7 @@ void output_close(int size) {
     fh1.FlushPage(ph2.GetPageNum());
     for(int i = ph2.GetPageNum()+1; i < size; i++) {
         fh1.DisposePage(i);
+        fh1.FlushPage(i);
     }
 }
 
